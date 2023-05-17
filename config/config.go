@@ -10,8 +10,9 @@ import (
 
 // This will act as a file to store all the constants
 type Config struct {
-	ServerHost string
-	MongoURL   string
+	serverHost   string
+	mongoURL     string
+	databaseName string
 }
 
 // To set the value of config object
@@ -23,13 +24,21 @@ func (c *Config) initialize() {
 		os.Exit(0)
 	}
 
-	c.MongoURL = os.Getenv("MONGO_URL")
-	c.ServerHost = os.Getenv("PORT")
-
+	c.mongoURL = os.Getenv("MONGO_URL")
+	c.serverHost = os.Getenv("PORT")
+	c.databaseName = os.Getenv("DB_NAME")
 }
 
 func (c *Config) GetMongoURL() string {
-	return c.MongoURL
+	return c.mongoURL
+}
+
+func (c *Config) GetDatabaseName() string {
+	return c.databaseName
+}
+
+func (c *Config) GetServerHost() string {
+	return c.serverHost
 }
 
 func NewConfig() *Config {
