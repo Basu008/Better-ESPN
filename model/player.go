@@ -14,8 +14,9 @@ type Player struct {
 }
 
 type PlayerProfile struct {
-	Grade string `json:"grade,omitempty" bson:"grade,omitempty"`
-	Stats *Stats `json:"stats" bson:"stats"`
+	Grade    string `json:"grade,omitempty" bson:"grade,omitempty"`
+	Position string `json:"position,omitempty" bson:"position,omitempty"`
+	Stats    *Stats `json:"stats,omitempty" bson:"stats,omitempty"`
 }
 
 type Stats struct {

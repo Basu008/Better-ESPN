@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/Basu008/Better-ESPN/helpers"
 	"github.com/Basu008/Better-ESPN/model"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -18,21 +19,28 @@ func CreatePlayer(db *mongo.Database, w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	//Then we will fetch the JSON body that the user must've provided
 	var player model.Player
-	err := json.NewDecoder(r.Body).Decode(&player)
+	var requestBody helpers.CreatePlayerRequestBody
+	err := json.NewDecoder(r.Body).Decode(&requestBody)
 	if err != nil {
 		//This will let the user know about to misformed JSON body
-		responseBody := Response{false, "Issue with JSON Body", nil}
-		CreateNewResponse(w, http.StatusBadRequest, &responseBody)
+		CreateNewResponse(w, http.StatusBadRequest, &Response{false, "Issue with JSON Body", nil})
 		return
 	}
-
-	//To set the initial
-	player.PlayerProfile.Stats = &model.Stats{
-		Goals:  0,
-		Assist: 0,
-		Fouls:  0,
+	if !requestBody.IsCreatePlayerRequestBodyValid() {
+		CreateNewResponse(w, http.StatusBadRequest, &Response{false, "Inputs given are invalid", nil})
+		return
 	}
-
+	//Now we set the data
+	player.Name = requestBody.Name
+	player.PlayerProfile = &model.PlayerProfile{
+		Grade:    requestBody.Grade,
+		Position: requestBody.Position,
+		Stats: &model.Stats{
+			Goals:  0,
+			Assist: 0,
+			Fouls:  0,
+		},
+	}
 	player.CreatedAt = time.Now().UTC()
 
 	//Now, if there is no error, we will send the player data to the DB
