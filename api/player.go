@@ -9,6 +9,7 @@ import (
 
 	"github.com/Basu008/Better-ESPN/helpers"
 	"github.com/Basu008/Better-ESPN/model"
+	"github.com/gorilla/mux"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -80,4 +81,31 @@ func GetAllPlayers(db *mongo.Database, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	CreateNewResponse(w, http.StatusAccepted, &Response{true, "", players})
+}
+
+func GetPlayerById(db *mongo.Database, w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	//all the quries from the end point
+	params := mux.Vars(r)
+	//Then we get the id from the map of queries
+	id, err := primitive.ObjectIDFromHex(params["id"])
+	if err != nil {
+		CreateNewResponse(w, http.StatusBadRequest, &Response{false, "Invalid player ID", nil})
+		return
+	}
+	//then we check in the db for the existance of document
+	var player model.Player
+	//How to get a document based on ID
+	mongoErr := db.Collection(collName).FindOne(context.Background(), model.Player{ID: id}).Decode(&player)
+	if mongoErr != nil {
+		switch mongoErr {
+		case mongo.ErrNoDocuments:
+			CreateNewResponse(w, http.StatusNotFound, &Response{false, "No player with this id exists", nil})
+		default:
+			CreateNewResponse(w, http.StatusInternalServerError, &Response{false, "Couldn't fetch documents", nil})
+		}
+		return
+	}
+	CreateNewResponse(w, http.StatusAccepted, &Response{true, "", player})
+
 }
