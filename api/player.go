@@ -110,6 +110,40 @@ func GetPlayerById(db *mongo.Database, w http.ResponseWriter, r *http.Request) {
 
 }
 
+func UpdatePlayer(db *mongo.Database, w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	//First we will check whether the body that we are recieving is valid or not
+	var updateData map[string]interface{}
+	err := json.NewDecoder(r.Body).Decode(&updateData)
+	if err != nil {
+		CreateNewResponse(w, http.StatusBadRequest, &Response{false, "JSON body incorrect", nil})
+		return
+	}
+	params := mux.Vars(r)
+	id, err := primitive.ObjectIDFromHex(params["id"])
+	if err != nil {
+		CreateNewResponse(w, http.StatusBadRequest, &Response{false, "Invalid player ID", nil})
+		return
+	}
+	filter := bson.M{"_id": id}
+	options := bson.M{
+		"$set": updateData,
+	}
+	result, err := db.Collection(collName).UpdateOne(context.Background(), filter, options)
+	if err != nil {
+		CreateNewResponse(w, http.StatusInternalServerError, &Response{false, "There was some issue", nil})
+		return
+	}
+
+	if result.MatchedCount == 1 {
+		CreateNewResponse(w, http.StatusAccepted, &Response{true, "", true})
+		return
+	}
+
+	CreateNewResponse(w, http.StatusInternalServerError, &Response{false, "Can't be updated!", nil})
+
+}
+
 func DeletePlayer(db *mongo.Database, w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	//Here we will only delete one player
@@ -129,6 +163,6 @@ func DeletePlayer(db *mongo.Database, w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	}
-	CreateNewResponse(w, http.StatusAccepted, &Response{true, "", nil})
+	CreateNewResponse(w, http.StatusAccepted, &Response{true, "", true})
 
 }

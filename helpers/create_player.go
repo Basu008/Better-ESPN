@@ -1,9 +1,9 @@
 package helpers
 
 type CreatePlayerRequestBody struct {
-	Name     string `json:"name"`
-	Grade    string `json:"grade"`
-	Position string `json:"position"`
+	Name     string `json:"name,omitempty"`
+	Grade    string `json:"grade,omitempty"`
+	Position string `json:"position,omitempty"`
 }
 
 func (player *CreatePlayerRequestBody) IsCreatePlayerRequestBodyValid() bool {
