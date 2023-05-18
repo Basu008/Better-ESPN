@@ -6,4 +6,5 @@ func (app *App) setRoutes() {
 	app.Post("/player", app.handleRequest(api.CreatePlayer))
 	app.Get("/players", app.handleRequest(api.GetAllPlayers))
 	app.Get("/player/{id}", app.handleRequest(api.GetPlayerById))
+	app.Delete("/player/{id}", app.handleRequest(api.DeletePlayer))
 }

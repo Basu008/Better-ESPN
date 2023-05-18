@@ -109,3 +109,26 @@ func GetPlayerById(db *mongo.Database, w http.ResponseWriter, r *http.Request) {
 	CreateNewResponse(w, http.StatusAccepted, &Response{true, "", player})
 
 }
+
+func DeletePlayer(db *mongo.Database, w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	//Here we will only delete one player
+	params := mux.Vars(r)
+	id, err := primitive.ObjectIDFromHex(params["id"])
+	if err != nil {
+		CreateNewResponse(w, http.StatusBadRequest, &Response{false, "Invalid player ID", nil})
+		return
+	}
+	_, deletionError := db.Collection(collName).DeleteOne(context.Background(), model.Player{ID: id})
+	if deletionError != nil {
+		switch deletionError {
+		case mongo.ErrNoDocuments:
+			CreateNewResponse(w, http.StatusNotFound, &Response{false, "No player with this id exists", nil})
+		default:
+			CreateNewResponse(w, http.StatusInternalServerError, &Response{false, "Couldn't fetch documents", nil})
+		}
+		return
+	}
+	CreateNewResponse(w, http.StatusAccepted, &Response{true, "", nil})
+
+}
