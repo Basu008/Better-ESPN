@@ -15,13 +15,11 @@ type Player struct {
 
 type PlayerProfile struct {
 	Grade string `json:"grade,omitempty" bson:"grade,omitempty"`
-	Stats *Stats `json:"stats,omitempty" bson:"stats,omitempty"`
+	Stats *Stats `json:"stats" bson:"stats"`
 }
 
 type Stats struct {
-	Goals    int `json:"goals,omitempty" bson:"goals,omitempty"`
-	Baskets  int `json:"baskets,omitempty" bson:"baskets,omitempty"`
-	Assist   int `json:"assists,omitempty" bson:"assists,omitempty"`
-	Fouls    int `json:"fouls,omitempty" bson:"fouls,omitempty"`
-	Rebounds int `json:"rebounds,omitempty" bson:"rebounds,omitempty"`
+	Goals  int `json:"goals" bson:"goals"`
+	Assist int `json:"assists" bson:"assists"`
+	Fouls  int `json:"fouls" bson:"fouls"`
 }

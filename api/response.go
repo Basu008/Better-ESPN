@@ -6,14 +6,14 @@ import (
 )
 
 type Response struct {
-	Status  int         `json:"status"`
+	Success bool        `json:"success"`
 	Message string      `json:"message,omitempty"`
 	Payload interface{} `json:"payload"`
 }
 
-func CreateNewResponse(w http.ResponseWriter, response *Response) error {
+func CreateNewResponse(w http.ResponseWriter, statusCode int, response *Response) error {
 	//Set the response code on the api
-	w.WriteHeader(response.Status)
+	w.WriteHeader(statusCode)
 	//Convert the struct to a JSON body
 	err := json.NewEncoder(w).Encode(response)
 	return err

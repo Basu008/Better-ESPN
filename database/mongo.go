@@ -19,7 +19,7 @@ func ConnectToDatabase(c *config.Config) *mongo.Database {
 	client, err := mongo.Connect(ctx, clientOption)
 
 	if err != nil {
-		log.Fatal("Can't connect to Mongo")
+		log.Fatal(err)
 	}
 
 	return client.Database(c.GetDatabaseName())
