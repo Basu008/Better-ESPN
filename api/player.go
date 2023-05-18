@@ -3,11 +3,13 @@ package api
 import (
 	"context"
 	"encoding/json"
+	"log"
 	"net/http"
 	"time"
 
 	"github.com/Basu008/Better-ESPN/helpers"
 	"github.com/Basu008/Better-ESPN/model"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
@@ -55,4 +57,27 @@ func CreatePlayer(db *mongo.Database, w http.ResponseWriter, r *http.Request) {
 
 	player.ID = result.InsertedID.(primitive.ObjectID)
 	CreateNewResponse(w, http.StatusCreated, &Response{true, "", player})
+}
+
+func GetAllPlayers(db *mongo.Database, w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	//First we get the cursor
+	var players []model.Player
+	cursor, err := db.Collection(collName).Find(context.TODO(), bson.M{})
+	defer func() {
+		err := cursor.Close(context.Background())
+		if err != nil {
+			log.Printf("Couldn't close cursor")
+		}
+	}()
+	if err != nil {
+		CreateNewResponse(w, http.StatusInternalServerError, &Response{false, "Coudln't find data", nil})
+		return
+	}
+	cursorErr := cursor.All(context.Background(), &players)
+	if cursorErr != nil {
+		CreateNewResponse(w, http.StatusInternalServerError, &Response{false, "Coudln't find data", nil})
+		return
+	}
+	CreateNewResponse(w, http.StatusAccepted, &Response{true, "", players})
 }

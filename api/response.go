@@ -8,7 +8,7 @@ import (
 type Response struct {
 	Success bool        `json:"success"`
 	Message string      `json:"message,omitempty"`
-	Payload interface{} `json:"payload"`
+	Payload interface{} `json:"payload,omitempty"`
 }
 
 func CreateNewResponse(w http.ResponseWriter, statusCode int, response *Response) error {
