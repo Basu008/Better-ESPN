@@ -20,7 +20,7 @@ type PlayerProfile struct {
 }
 
 type Stats struct {
-	Goals  int `json:"goals" bson:"goals"`
-	Assist int `json:"assists" bson:"assists"`
-	Fouls  int `json:"fouls" bson:"fouls"`
+	Goals   int `json:"goals" bson:"goals"`
+	Assists int `json:"assists" bson:"assists"`
+	Fouls   int `json:"fouls" bson:"fouls"`
 }

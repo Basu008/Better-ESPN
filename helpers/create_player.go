@@ -7,13 +7,13 @@ type CreatePlayerRequestBody struct {
 }
 
 func (player *CreatePlayerRequestBody) IsCreatePlayerRequestBodyValid() bool {
-	if player.Name != "" && isGradeValid(player.Grade) && isPositionValid(player.Position) {
+	if player.Name != "" && IsGradeValid(player.Grade) && IsPositionValid(player.Position) {
 		return true
 	}
 	return false
 }
 
-func isGradeValid(grade string) bool {
+func IsGradeValid(grade string) bool {
 	if grade == "" {
 		return false
 	}
@@ -27,7 +27,7 @@ func isGradeValid(grade string) bool {
 	return true
 }
 
-func isPositionValid(position string) bool {
+func IsPositionValid(position string) bool {
 	if position == "" {
 		return false
 	}

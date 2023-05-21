@@ -39,9 +39,9 @@ func CreatePlayer(db *mongo.Database, w http.ResponseWriter, r *http.Request) {
 		Grade:    requestBody.Grade,
 		Position: requestBody.Position,
 		Stats: &model.Stats{
-			Goals:  0,
-			Assist: 0,
-			Fouls:  0,
+			Goals:   0,
+			Assists: 0,
+			Fouls:   0,
 		},
 	}
 	player.CreatedAt = time.Now().UTC()
@@ -113,8 +113,8 @@ func GetPlayerById(db *mongo.Database, w http.ResponseWriter, r *http.Request) {
 func UpdatePlayer(db *mongo.Database, w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	//First we will check whether the body that we are recieving is valid or not
-	var updateData map[string]interface{}
-	err := json.NewDecoder(r.Body).Decode(&updateData)
+	var playerSchema helpers.Player
+	err := json.NewDecoder(r.Body).Decode(&playerSchema)
 	if err != nil {
 		CreateNewResponse(w, http.StatusBadRequest, &Response{false, "JSON body incorrect", nil})
 		return
@@ -125,10 +125,55 @@ func UpdatePlayer(db *mongo.Database, w http.ResponseWriter, r *http.Request) {
 		CreateNewResponse(w, http.StatusBadRequest, &Response{false, "Invalid player ID", nil})
 		return
 	}
+	var fieldsToBeUpdated primitive.M = primitive.M{}
+	if playerSchema.Name != "" {
+		fieldsToBeUpdated["name"] = playerSchema.Name
+	}
+	if playerSchema.Grade != "" {
+		if helpers.IsGradeValid(playerSchema.Grade) {
+			fieldsToBeUpdated["player_profile.grade"] = playerSchema.Grade
+		} else {
+			CreateNewResponse(w, http.StatusBadRequest, &Response{false, "Invalid player grade", nil})
+			return
+		}
+	}
+	if playerSchema.Position != "" {
+		if helpers.IsPositionValid(playerSchema.Position) {
+			fieldsToBeUpdated["player_profile.position"] = playerSchema.Position
+		} else {
+			CreateNewResponse(w, http.StatusBadRequest, &Response{false, "Invalid player position", nil})
+			return
+		}
+	}
+	if playerSchema.Goals != nil {
+		goals := *(playerSchema.Goals)
+		if goals < 0 {
+			CreateNewResponse(w, http.StatusBadRequest, &Response{false, "Goals can't be negative", nil})
+			return
+		}
+		fieldsToBeUpdated["player_profile.stats.goals"] = goals
+	}
+	if playerSchema.Assists != nil {
+		assists := *(playerSchema.Assists)
+		if assists < 0 {
+			CreateNewResponse(w, http.StatusBadRequest, &Response{false, "Assists can't be negative", nil})
+			return
+		}
+		fieldsToBeUpdated["player_profile.stats.assists"] = assists
+	}
+	if playerSchema.Fouls != nil {
+		fouls := *(playerSchema.Fouls)
+		if fouls < 0 {
+			CreateNewResponse(w, http.StatusBadRequest, &Response{false, "Fouls can't be negative", nil})
+			return
+		}
+		fieldsToBeUpdated["player_profile.stats.fouls"] = fouls
+	}
 	filter := bson.M{"_id": id}
 	options := bson.M{
-		"$set": updateData,
+		"$set": fieldsToBeUpdated,
 	}
+
 	result, err := db.Collection(collName).UpdateOne(context.Background(), filter, options)
 	if err != nil {
 		CreateNewResponse(w, http.StatusInternalServerError, &Response{false, "There was some issue", nil})
