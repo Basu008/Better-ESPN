@@ -232,3 +232,25 @@ func GetTopScorers(db *mongo.Database, w http.ResponseWriter, r *http.Request) {
 	CreateNewResponse(w, http.StatusAccepted, &Response{true, "", players})
 
 }
+
+func GetPlayersFromPositions(db *mongo.Database, w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	var players = []model.Player{}
+	position := r.URL.Query().Get("position")
+	if !helpers.IsPositionValid(position) {
+		CreateNewResponse(w, http.StatusBadRequest, &Response{false, "Invalid Position", nil})
+		return
+	}
+	filter := bson.D{{Key: "player_profile.position", Value: position}}
+	cur, err := db.Collection(playerCollection).Find(context.TODO(), filter)
+	if err != nil {
+		CreateNewResponse(w, http.StatusInternalServerError, &Response{false, "Can't fetch documents", nil})
+		return
+	}
+	cursorError := cur.All(context.TODO(), &players)
+	if cursorError != nil {
+		CreateNewResponse(w, http.StatusInternalServerError, &Response{false, "Ill formed data", nil})
+		return
+	}
+	CreateNewResponse(w, http.StatusAccepted, &Response{true, "", players})
+}

@@ -5,6 +5,7 @@ import "github.com/Basu008/Better-ESPN/api"
 func (app *App) setRoutes() {
 	app.Post("/player", app.handleRequest(api.CreatePlayer))
 	app.Get("/players", app.handleRequest(api.GetAllPlayers))
+	app.Get("/players-by-position", app.handleRequest(api.GetPlayersFromPositions))
 	app.Get("/player/{id}", app.handleRequest(api.GetPlayerById))
 	app.Get("/top-scorers", app.handleRequest(api.GetTopScorers))
 	app.Delete("/player/{id}", app.handleRequest(api.DeletePlayer))
