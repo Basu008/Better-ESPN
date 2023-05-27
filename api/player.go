@@ -65,7 +65,7 @@ func GetAllPlayers(db *mongo.Database, w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	//First we get the cursor
 	var players []model.Player
-	cursor, err := db.Collection(playerCollection).Find(context.TODO(), bson.M{})
+	cursor, err := db.Collection(playerCollection).Find(context.TODO(), bson.D{})
 	defer func() {
 		err := cursor.Close(context.Background())
 		if err != nil {

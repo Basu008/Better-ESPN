@@ -37,7 +37,7 @@ func (app *App) handleRequest(handlerFunction RequestHandlerFunction) http.Handl
 }
 
 func (app *App) StartServer(host string) {
-	log.Printf("Server is listening on port:%s", host)
+	log.Printf("Server is listening on port%s", host)
 	log.Fatal(http.ListenAndServe(host, app.Router))
 	app.Database.Client().Disconnect(context.Background())
 }
