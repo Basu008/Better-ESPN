@@ -36,6 +36,7 @@ func CreateTeam(db *mongo.Database, w http.ResponseWriter, r *http.Request) {
 		CreateNewResponse(w, http.StatusBadRequest, &Response{false, "Add at least 2 players to the team :)", nil})
 		return
 	}
+	team.Players = playerIds
 	_, err := db.Collection(collection).InsertOne(context.Background(), team)
 	if err != nil {
 		CreateNewResponse(w, http.StatusInternalServerError, &Response{false, "Couldn't add data to the server", nil})
