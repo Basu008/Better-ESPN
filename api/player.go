@@ -13,9 +13,10 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-const collName = "player"
+const playerCollection = "player"
 
 func CreatePlayer(db *mongo.Database, w http.ResponseWriter, r *http.Request) {
 	//Set the heder meaning the type of data that is being used ie. JSON
@@ -47,7 +48,7 @@ func CreatePlayer(db *mongo.Database, w http.ResponseWriter, r *http.Request) {
 	player.CreatedAt = time.Now().UTC()
 
 	//Now, if there is no error, we will send the player data to the DB
-	result, err := db.Collection(collName).InsertOne(context.Background(), player)
+	result, err := db.Collection(playerCollection).InsertOne(context.Background(), player)
 
 	if err != nil {
 		CreateNewResponse(w, http.StatusInternalServerError, &Response{false, "Player can't be create. Try Again!", nil})
@@ -64,7 +65,7 @@ func GetAllPlayers(db *mongo.Database, w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	//First we get the cursor
 	var players []model.Player
-	cursor, err := db.Collection(collName).Find(context.TODO(), bson.M{})
+	cursor, err := db.Collection(playerCollection).Find(context.TODO(), bson.M{})
 	defer func() {
 		err := cursor.Close(context.Background())
 		if err != nil {
@@ -96,7 +97,7 @@ func GetPlayerById(db *mongo.Database, w http.ResponseWriter, r *http.Request) {
 	//then we check in the db for the existance of document
 	var player model.Player
 	//How to get a document based on ID
-	mongoErr := db.Collection(collName).FindOne(context.Background(), model.Player{ID: id}).Decode(&player)
+	mongoErr := db.Collection(playerCollection).FindOne(context.Background(), model.Player{ID: id}).Decode(&player)
 	if mongoErr != nil {
 		switch mongoErr {
 		case mongo.ErrNoDocuments:
@@ -174,7 +175,7 @@ func UpdatePlayer(db *mongo.Database, w http.ResponseWriter, r *http.Request) {
 		"$set": fieldsToBeUpdated,
 	}
 
-	result, err := db.Collection(collName).UpdateOne(context.Background(), filter, options)
+	result, err := db.Collection(playerCollection).UpdateOne(context.Background(), filter, options)
 	if err != nil {
 		CreateNewResponse(w, http.StatusInternalServerError, &Response{false, "There was some issue", nil})
 		return
@@ -198,7 +199,7 @@ func DeletePlayer(db *mongo.Database, w http.ResponseWriter, r *http.Request) {
 		CreateNewResponse(w, http.StatusBadRequest, &Response{false, "Invalid player ID", nil})
 		return
 	}
-	_, deletionError := db.Collection(collName).DeleteOne(context.Background(), model.Player{ID: id})
+	_, deletionError := db.Collection(playerCollection).DeleteOne(context.Background(), model.Player{ID: id})
 	if deletionError != nil {
 		switch deletionError {
 		case mongo.ErrNoDocuments:
@@ -209,5 +210,25 @@ func DeletePlayer(db *mongo.Database, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	CreateNewResponse(w, http.StatusAccepted, &Response{true, "", true})
+
+}
+
+func GetTopScorers(db *mongo.Database, w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	var players = []model.Player{}
+	sortOption := options.Find().SetSort(bson.D{
+		{Key: "player_profile.stats.goals", Value: -1},
+		{Key: "name", Value: 1},
+	}).SetLimit(5)
+	cursor, err := db.Collection(playerCollection).Find(context.Background(), bson.D{}, sortOption)
+	if err != nil {
+		CreateNewResponse(w, http.StatusInternalServerError, &Response{false, "Couldn't fetch documents", nil})
+		return
+	}
+	if err := cursor.All(context.TODO(), &players); err != nil {
+		CreateNewResponse(w, http.StatusInternalServerError, &Response{false, "Couldn't fetch documents", nil})
+		return
+	}
+	CreateNewResponse(w, http.StatusAccepted, &Response{true, "", players})
 
 }
