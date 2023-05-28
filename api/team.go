@@ -101,7 +101,7 @@ func GetAllTeams(db *mongo.Database, w http.ResponseWriter, r *http.Request) {
 
 func AddPlayerToTeam(db *mongo.Database, w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	var updateTeamRequestBody helpers.AddPlayerToTeam
+	var updateTeamRequestBody helpers.UpdateTeamPlayers
 	err := json.NewDecoder(r.Body).Decode(&updateTeamRequestBody)
 	if err != nil {
 		CreateNewResponse(w, http.StatusBadRequest, &Response{false, "Badly formed JSON body", nil})
@@ -138,6 +138,43 @@ func AddPlayerToTeam(db *mongo.Database, w http.ResponseWriter, r *http.Request)
 	_, updateErr := db.Collection(teamsCollection).UpdateOne(context.TODO(), filter, update)
 	if updateErr != nil {
 		CreateNewResponse(w, http.StatusInternalServerError, &Response{false, "Coudln't update data", nil})
+		return
+	}
+	CreateNewResponse(w, http.StatusAccepted, &Response{true, "", true})
+}
+
+func RemovePlayerFromTeam(db *mongo.Database, w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	var updateTeamRequestBody helpers.UpdateTeamPlayers
+	err := json.NewDecoder(r.Body).Decode(&updateTeamRequestBody)
+	if err != nil {
+		CreateNewResponse(w, http.StatusBadRequest, &Response{false, "JSON bana bhai shi se", nil})
+		return
+	}
+	teamId, err := primitive.ObjectIDFromHex(updateTeamRequestBody.ID)
+	if err != nil {
+		CreateNewResponse(w, http.StatusBadRequest, &Response{false, "Team id galat hai", nil})
+		return
+	}
+	if len(updateTeamRequestBody.PlayerIds) < 1 {
+		CreateNewResponse(w, http.StatusBadRequest, &Response{false, "ek player ki id toh de bhai mere", nil})
+		return
+	}
+	var playerIds = []primitive.ObjectID{}
+	for _, id := range updateTeamRequestBody.PlayerIds {
+		playerId, err := primitive.ObjectIDFromHex(id)
+		if err != nil {
+			CreateNewResponse(w, http.StatusBadRequest, &Response{false, "PLayer id galat hai", nil})
+			return
+		}
+		playerIds = append(playerIds, playerId)
+	}
+	filter := bson.D{{Key: "_id", Value: teamId}}
+	subQuery := bson.D{{Key: "players", Value: bson.D{{Key: "$in", Value: playerIds}}}}
+	updateQuery := bson.D{{Key: "$pull", Value: subQuery}}
+	_, updaterErr := db.Collection(teamsCollection).UpdateOne(context.TODO(), filter, updateQuery)
+	if updaterErr != nil {
+		CreateNewResponse(w, http.StatusInternalServerError, &Response{false, "Nhi ho paaya update", nil})
 		return
 	}
 	CreateNewResponse(w, http.StatusAccepted, &Response{true, "", true})

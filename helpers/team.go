@@ -5,7 +5,7 @@ type Team struct {
 	Players []string `json:"players,omitempty"`
 }
 
-type AddPlayerToTeam struct {
+type UpdateTeamPlayers struct {
 	ID        string   `json:"id,omitempty"`
 	PlayerIds []string `json:"player_ids,omitempty"`
 }
