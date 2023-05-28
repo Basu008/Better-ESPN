@@ -77,6 +77,7 @@ func GetTeamById(db *mongo.Database, w http.ResponseWriter, r *http.Request) {
 }
 
 func GetAllTeams(db *mongo.Database, w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
 	var teams = []model.Team{}
 	curr, err := db.Collection(teamsCollection).Find(context.TODO(), bson.D{})
 	if err != nil {
@@ -96,4 +97,48 @@ func GetAllTeams(db *mongo.Database, w http.ResponseWriter, r *http.Request) {
 	}
 	CreateNewResponse(w, http.StatusAccepted, &Response{true, "", teams})
 
+}
+
+func AddPlayerToTeam(db *mongo.Database, w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	var updateTeamRequestBody helpers.AddPlayerToTeam
+	err := json.NewDecoder(r.Body).Decode(&updateTeamRequestBody)
+	if err != nil {
+		CreateNewResponse(w, http.StatusBadRequest, &Response{false, "Badly formed JSON body", nil})
+		return
+	}
+	teamId, err := primitive.ObjectIDFromHex(updateTeamRequestBody.ID)
+	if err != nil {
+		CreateNewResponse(w, http.StatusBadRequest, &Response{false, "Incorrect Team Id.", nil})
+		return
+	}
+	if len(updateTeamRequestBody.PlayerIds) < 1 {
+		CreateNewResponse(w, http.StatusBadRequest, &Response{false, "Provide at least one player id", nil})
+		return
+	}
+	var playerIds = []primitive.ObjectID{}
+	for _, id := range updateTeamRequestBody.PlayerIds {
+		playerId, err := primitive.ObjectIDFromHex(id)
+		if err != nil {
+			CreateNewResponse(w, http.StatusBadRequest, &Response{false, "Incorrect Player Id.", nil})
+			return
+		}
+		playerIds = append(playerIds, playerId)
+	}
+	filter := bson.D{
+		{Key: "_id", Value: teamId},
+	}
+	addPlayerQuery := bson.D{
+		{Key: "$each", Value: playerIds},
+	}
+	update := bson.D{
+		{Key: "$addToSet", Value: bson.D{
+			{Key: "players", Value: addPlayerQuery}}},
+	}
+	_, updateErr := db.Collection(teamsCollection).UpdateOne(context.TODO(), filter, update)
+	if updateErr != nil {
+		CreateNewResponse(w, http.StatusInternalServerError, &Response{false, "Coudln't update data", nil})
+		return
+	}
+	CreateNewResponse(w, http.StatusAccepted, &Response{true, "", true})
 }

@@ -12,5 +12,6 @@ func (app *App) setRoutes() {
 	app.Put("/player/{id}", app.handleRequest(api.UpdatePlayer))
 
 	app.Post("/team", app.handleRequest(api.CreateTeam))
+	app.Put("/team/add-player", app.handleRequest(api.AddPlayerToTeam))
 	app.Get("/team", app.handleRequest(api.GetTeamById))
 }
