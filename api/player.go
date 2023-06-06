@@ -3,8 +3,10 @@ package api
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/Basu008/Better-ESPN/helpers"
@@ -65,7 +67,28 @@ func GetAllPlayers(db *mongo.Database, w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	//First we get the cursor
 	var players []model.Player
-	cursor, err := db.Collection(playerCollection).Find(context.TODO(), bson.D{})
+	//To get the page number
+	page := r.URL.Query().Get("page")
+
+	//We create an option now to apply pagination
+	//skip will be used to skip the documents
+	skip, err := strconv.ParseInt(page, 10, 64)
+	if err != nil {
+		CreateNewResponse(w, http.StatusBadRequest, &Response{false, "Page number should be an integer", nil})
+		return
+	}
+	if skip < 0 {
+		CreateNewResponse(w, http.StatusBadRequest, &Response{false, "Page number should be positive", nil})
+		return
+	}
+	skip = skip * 20
+	var limit int64 = 20
+	options := options.FindOptions{
+		Skip:  &skip,
+		Limit: &limit,
+	}
+	fmt.Println("skip count : ", skip)
+	cursor, err := db.Collection(playerCollection).Find(context.TODO(), bson.D{}, &options)
 	defer func() {
 		err := cursor.Close(context.Background())
 		if err != nil {
