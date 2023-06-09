@@ -13,6 +13,7 @@ type Config struct {
 	serverHost   string
 	mongoURL     string
 	databaseName string
+	jwtSecretKey string
 }
 
 // To set the value of config object
@@ -23,10 +24,10 @@ func (c *Config) initialize() {
 		log.Fatal("Can't fetch env variables")
 		os.Exit(0)
 	}
-
 	c.mongoURL = os.Getenv("MONGO_URL")
 	c.serverHost = os.Getenv("PORT")
 	c.databaseName = os.Getenv("DB_NAME")
+	c.jwtSecretKey = os.Getenv("JWT_SECRET_KEY")
 }
 
 func (c *Config) GetMongoURL() string {
@@ -39,6 +40,10 @@ func (c *Config) GetDatabaseName() string {
 
 func (c *Config) GetServerHost() string {
 	return c.serverHost
+}
+
+func (c *Config) GetJWTKey() string {
+	return c.jwtSecretKey
 }
 
 func NewConfig() *Config {
