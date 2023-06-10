@@ -9,7 +9,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-func Login(db *mongo.Database, w http.ResponseWriter, r *http.Request) {
+func SignUp(db *mongo.Database, w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	var user helpers.Login
 	if err := json.NewDecoder(r.Body).Decode(&user); err != nil {

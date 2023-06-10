@@ -16,5 +16,5 @@ func (app *App) setRoutes() {
 	app.Put("/team/remove-player", app.handleRequest(api.RemovePlayerFromTeam))
 	app.Get("/team", app.handleRequest(api.GetTeamById))
 
-	app.Post("/login", app.handleRequest(api.Login))
+	app.Post("/signup", app.handleRequest(api.SignUp))
 }
