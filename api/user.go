@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"github.com/Basu008/Better-ESPN/auth"
 	"github.com/Basu008/Better-ESPN/helpers"
 	"go.mongodb.org/mongo-driver/mongo"
 )
@@ -15,5 +16,11 @@ func Login(db *mongo.Database, w http.ResponseWriter, r *http.Request) {
 		CreateNewResponse(w, http.StatusBadRequest, &Response{false, "Issue with JSON Body", nil})
 		return
 	}
-	CreateNewResponse(w, http.StatusAccepted, &Response{true, "", user})
+	claim := auth.UserClaim{
+		Id:       "1",
+		Name:     user.Name,
+		Username: user.UserName,
+	}
+	token, _ := claim.SignAuthToken()
+	CreateNewResponse(w, http.StatusAccepted, &Response{true, "", token})
 }
