@@ -3,12 +3,12 @@ package api
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 	"strconv"
 	"time"
 
+	"github.com/Basu008/Better-ESPN/auth"
 	"github.com/Basu008/Better-ESPN/helpers"
 	"github.com/Basu008/Better-ESPN/model"
 	"github.com/gorilla/mux"
@@ -24,6 +24,12 @@ func CreatePlayer(db *mongo.Database, w http.ResponseWriter, r *http.Request) {
 	//Set the heder meaning the type of data that is being used ie. JSON
 	w.Header().Set("Content-Type", "application/json")
 	//Then we will fetch the JSON body that the user must've provided
+	authToken := r.Header.Get("Authorization")
+	_, authErr := auth.VerifyAuthToken(authToken)
+	if authErr != nil {
+		CreateNewResponse(w, http.StatusUnauthorized, &Response{false, "Auth token required", nil})
+		return
+	}
 	var player model.Player
 	var requestBody helpers.CreatePlayerRequestBody
 	err := json.NewDecoder(r.Body).Decode(&requestBody)
@@ -87,7 +93,6 @@ func GetAllPlayers(db *mongo.Database, w http.ResponseWriter, r *http.Request) {
 		Skip:  &skip,
 		Limit: &limit,
 	}
-	fmt.Println("skip count : ", skip)
 	cursor, err := db.Collection(playerCollection).Find(context.TODO(), bson.D{}, &options)
 	defer func() {
 		err := cursor.Close(context.Background())
