@@ -109,7 +109,7 @@ func GetAllPlayers(db *mongo.Database, w http.ResponseWriter, r *http.Request) {
 		CreateNewResponse(w, http.StatusInternalServerError, &Response{false, "Coudln't find data", nil})
 		return
 	}
-	CreateNewResponse(w, http.StatusAccepted, &Response{true, "", players})
+	CreateNewResponse(w, http.StatusOK, &Response{true, "", players})
 }
 
 func GetPlayerById(db *mongo.Database, w http.ResponseWriter, r *http.Request) {
@@ -135,7 +135,7 @@ func GetPlayerById(db *mongo.Database, w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	}
-	CreateNewResponse(w, http.StatusAccepted, &Response{true, "", player})
+	CreateNewResponse(w, http.StatusOK, &Response{true, "", player})
 
 }
 
@@ -210,7 +210,7 @@ func UpdatePlayer(db *mongo.Database, w http.ResponseWriter, r *http.Request) {
 	}
 
 	if result.MatchedCount == 1 {
-		CreateNewResponse(w, http.StatusAccepted, &Response{true, "", true})
+		CreateNewResponse(w, http.StatusOK, &Response{true, "", true})
 		return
 	}
 
@@ -237,7 +237,7 @@ func DeletePlayer(db *mongo.Database, w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	}
-	CreateNewResponse(w, http.StatusAccepted, &Response{true, "", true})
+	CreateNewResponse(w, http.StatusOK, &Response{true, "", true})
 
 }
 
@@ -257,7 +257,7 @@ func GetTopScorers(db *mongo.Database, w http.ResponseWriter, r *http.Request) {
 		CreateNewResponse(w, http.StatusInternalServerError, &Response{false, "Couldn't fetch documents", nil})
 		return
 	}
-	CreateNewResponse(w, http.StatusAccepted, &Response{true, "", players})
+	CreateNewResponse(w, http.StatusOK, &Response{true, "", players})
 
 }
 
@@ -280,5 +280,5 @@ func GetPlayersFromPositions(db *mongo.Database, w http.ResponseWriter, r *http.
 		CreateNewResponse(w, http.StatusInternalServerError, &Response{false, "Ill formed data", nil})
 		return
 	}
-	CreateNewResponse(w, http.StatusAccepted, &Response{true, "", players})
+	CreateNewResponse(w, http.StatusOK, &Response{true, "", players})
 }

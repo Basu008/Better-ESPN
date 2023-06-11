@@ -44,7 +44,7 @@ func CreateTeam(db *mongo.Database, w http.ResponseWriter, r *http.Request) {
 		CreateNewResponse(w, http.StatusInternalServerError, &Response{false, "Couldn't add data to the server", nil})
 		return
 	}
-	CreateNewResponse(w, http.StatusAccepted, &Response{true, "", true})
+	CreateNewResponse(w, http.StatusOK, &Response{true, "", true})
 }
 
 func GetTeamById(db *mongo.Database, w http.ResponseWriter, r *http.Request) {
@@ -73,7 +73,7 @@ func GetTeamById(db *mongo.Database, w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	}
-	CreateNewResponse(w, http.StatusAccepted, &Response{true, "", team})
+	CreateNewResponse(w, http.StatusOK, &Response{true, "", team})
 }
 
 func GetAllTeams(db *mongo.Database, w http.ResponseWriter, r *http.Request) {
@@ -95,7 +95,7 @@ func GetAllTeams(db *mongo.Database, w http.ResponseWriter, r *http.Request) {
 		CreateNewResponse(w, http.StatusInternalServerError, &Response{false, "Couldn't fetch documents", nil})
 		return
 	}
-	CreateNewResponse(w, http.StatusAccepted, &Response{true, "", teams})
+	CreateNewResponse(w, http.StatusOK, &Response{true, "", teams})
 
 }
 
@@ -140,7 +140,7 @@ func AddPlayerToTeam(db *mongo.Database, w http.ResponseWriter, r *http.Request)
 		CreateNewResponse(w, http.StatusInternalServerError, &Response{false, "Coudln't update data", nil})
 		return
 	}
-	CreateNewResponse(w, http.StatusAccepted, &Response{true, "", true})
+	CreateNewResponse(w, http.StatusOK, &Response{true, "", true})
 }
 
 func RemovePlayerFromTeam(db *mongo.Database, w http.ResponseWriter, r *http.Request) {
@@ -177,5 +177,5 @@ func RemovePlayerFromTeam(db *mongo.Database, w http.ResponseWriter, r *http.Req
 		CreateNewResponse(w, http.StatusInternalServerError, &Response{false, "Nhi ho paaya update", nil})
 		return
 	}
-	CreateNewResponse(w, http.StatusAccepted, &Response{true, "", true})
+	CreateNewResponse(w, http.StatusOK, &Response{true, "", true})
 }
